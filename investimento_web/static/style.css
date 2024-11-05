@@ -72,13 +72,13 @@ a:hover, .button:hover {
     color: #f7931a;
 }
 
-/* Classes para lucro e perda */
+/* Lucro e perda */
 .positive {
-    color: #00c851; /* Verde para valores positivos */
+    color: #00c851;
 }
 
 .negative {
-    color: #ff4444; /* Vermelho para valores negativos */
+    color: #ff4444;
 }
 
 /* Parágrafos */
@@ -112,4 +112,45 @@ p {
     align-items: center;
     gap: 10px;
     margin-bottom: 15px;
+}
+
+/* Media Query para telas menores (celulares) */
+@media (max-width: 600px) {
+    /* Reduz o padding do container e centraliza o conteúdo */
+    .container {
+        padding: 15px;
+    }
+
+    /* Tamanhos de fontes menores para títulos */
+    h1, h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    /* Ajuste de padding na tabela */
+    th, td {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    /* Botões em tela cheia */
+    a, .button {
+        width: 100%;
+        font-size: 1em;
+        padding: 12px;
+    }
+
+    /* Estilo da linha para manter elementos na vertical */
+    .linha {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    /* Ajustes na tabela para evitar estouro de largura */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }
