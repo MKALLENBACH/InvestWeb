@@ -1,14 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, get_flashed_messages
-import openpyxl
+from flask_sqlalchemy import SQLAlchemy
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
-import os 
+import os
 
-load_dotenv()  # Carrega as variáveis do arquivo .env
+# Carregar variáveis de ambiente
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
+
+# Configuração do Banco de Dados
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # Credenciais de login
 USUARIO = os.getenv('USUARIO')
@@ -21,18 +27,17 @@ MESES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "
 def formatar_moeda(valor):
     return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-# Função para carregar a planilha de investimentos de um determinado ano
-def carregar_planilha(ano):
-    try:
-        workbook = openpyxl.load_workbook(f"investimentos_btc_{ano}.xlsx")
-    except FileNotFoundError:
-        workbook = openpyxl.Workbook()
-        workbook.remove(workbook.active)  # Remove a aba padrão
-        for mes in MESES:
-            sheet = workbook.create_sheet(title=mes)
-            sheet.append(["Investimento (R$)", "Quantidade de BTC"])
-        workbook.save(f"investimentos_btc_{ano}.xlsx")
-    return workbook
+# Modelo de dados para investimentos no banco de dados
+class Investimento(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ano = db.Column(db.String(4), nullable=False)
+    mes = db.Column(db.String(3), nullable=False)
+    investimento = db.Column(db.Float, nullable=False)
+    quantidade_btc = db.Column(db.Float, nullable=False)
+
+# Criar as tabelas no banco de dados (execute uma vez)
+with app.app_context():
+    db.create_all()
 
 # Função para obter a cotação atual do BTC em reais
 def obter_cotacao_btc():
@@ -82,16 +87,15 @@ def selecionar_ano():
 def resumo(ano):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    
-    workbook = carregar_planilha(ano)
-    resumo_mensal = []
 
-    for sheet in workbook.sheetnames:
-        aba = workbook[sheet]
-        investimento = sum(cell.value for cell in aba["A"] if isinstance(cell.value, (int, float)))
-        quantidade_btc = sum(cell.value for cell in aba["B"] if isinstance(cell.value, (int, float)))
-        investimento_formatado = formatar_moeda(investimento)
-        resumo_mensal.append({"mes": sheet, "investimento": investimento_formatado, "quantidade_btc": quantidade_btc})
+    # Obter dados do banco de dados para o ano selecionado
+    resumo_mensal = []
+    for mes in MESES:
+        investimentos = Investimento.query.filter_by(ano=ano, mes=mes).all()
+        investimento_total = sum([inv.investimento for inv in investimentos])
+        quantidade_btc_total = sum([inv.quantidade_btc for inv in investimentos])
+        investimento_formatado = formatar_moeda(investimento_total)
+        resumo_mensal.append({"mes": mes, "investimento": investimento_formatado, "quantidade_btc": quantidade_btc_total})
 
     return render_template("resumo.html", resumo_mensal=resumo_mensal, ano=ano)
 
@@ -105,21 +109,18 @@ def lucro():
     total_btc = 0
 
     for ano in anos:
-        workbook = carregar_planilha(ano)
-        for sheet in workbook.sheetnames:
-            aba = workbook[sheet]
-            total_investido += sum(cell.value for cell in aba["A"] if isinstance(cell.value, (int, float)))
-            total_btc += sum(cell.value for cell in aba["B"] if isinstance(cell.value, (int, float)))
+        investimentos = Investimento.query.filter_by(ano=ano).all()
+        total_investido += sum([inv.investimento for inv in investimentos])
+        total_btc += sum([inv.quantidade_btc for inv in investimentos])
 
     cotacao_btc = obter_cotacao_btc()
     if cotacao_btc is None:
         flash("Erro ao obter a cotação do BTC.")
-        lucro_prejuizo = None  # Define lucro_prejuizo como None se a cotação falhar
+        lucro_prejuizo = None
     else:
         valor_total_em_reais = total_btc * cotacao_btc
         lucro_prejuizo = valor_total_em_reais - total_investido
 
-        # Formata valores para exibição
         total_investido = formatar_moeda(total_investido)
         valor_total_em_reais = formatar_moeda(valor_total_em_reais)
         lucro_prejuizo_formatado = formatar_moeda(lucro_prejuizo)
@@ -129,8 +130,8 @@ def lucro():
         "lucro.html",
         total_investido=total_investido,
         total_btc=total_btc,
-        valor_total_em_reais=valor_total_em_reais if cotacao_btc else None,
-        lucro_prejuizo_formatado=lucro_prejuizo_formatado if cotacao_btc else None,
+        valor_total_em_reais=valor_total_em_reais,
+        lucro_prejuizo_formatado=lucro_prejuizo_formatado,
         cotacao_btc=cotacao_btc,
         lucro_prejuizo=lucro_prejuizo
     )
@@ -143,11 +144,10 @@ def editar():
     ano = request.args.get('ano')
     if request.method == 'POST':
         mes_selecionado = request.form.get('mes')
-        workbook = carregar_planilha(ano)
-        aba = workbook[mes_selecionado]
-        valores_atuais = [{"investimento": row[0], "quantidade_btc": row[1]} for row in aba.iter_rows(min_row=2, values_only=True)]
+        investimentos = Investimento.query.filter_by(ano=ano, mes=mes_selecionado).all()
+        valores_atuais = [{"investimento": inv.investimento, "quantidade_btc": inv.quantidade_btc} for inv in investimentos]
         return render_template("editar_mes.html", mes_selecionado=mes_selecionado, valores_atuais=valores_atuais, ano=ano)
-    
+
     return render_template("selecionar_mes.html", meses=MESES, ano=ano)
 
 @app.route('/salvar_edicao', methods=['POST'])
@@ -157,18 +157,21 @@ def salvar_edicao():
     novos_investimentos = request.form.getlist('investimento[]')
     novas_quantidades_btc = request.form.getlist('quantidade_btc[]')
 
-    workbook = carregar_planilha(ano)
-    aba = workbook[mes_selecionado]
+    # Apagar investimentos existentes para o mês selecionado
+    Investimento.query.filter_by(ano=ano, mes=mes_selecionado).delete()
 
-    aba.delete_rows(2, aba.max_row)
-
+    # Adicionar novos valores
     for investimento, quantidade_btc in zip(novos_investimentos, novas_quantidades_btc):
         if investimento and quantidade_btc:
-            investimento = float(investimento.replace(',', '.'))
-            quantidade_btc = float(quantidade_btc.replace(',', '.'))
-            aba.append([investimento, quantidade_btc])
+            novo_investimento = Investimento(
+                ano=ano,
+                mes=mes_selecionado,
+                investimento=float(investimento.replace(',', '.')),
+                quantidade_btc=float(quantidade_btc.replace(',', '.'))
+            )
+            db.session.add(novo_investimento)
 
-    workbook.save(f"investimentos_btc_{ano}.xlsx")
+    db.session.commit()
     flash("Alterações salvas com sucesso!")
     return redirect(url_for('resumo', ano=ano))
 
