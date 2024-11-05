@@ -4,6 +4,7 @@ import requests
 import locale
 from datetime import datetime
 from dotenv import load_dotenv
+import os 
 
 load_dotenv()  # Carrega as variáveis do arquivo .env
 
