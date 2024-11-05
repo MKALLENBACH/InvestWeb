@@ -1,1 +1,1 @@
-web: python app.py
+web: python investimento_web/app.py
