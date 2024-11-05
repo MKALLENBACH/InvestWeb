@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, get_flashed_messages
 import openpyxl
 import requests
-import locale
 from datetime import datetime
 from dotenv import load_dotenv
 import os 
@@ -11,27 +10,31 @@ load_dotenv()  # Carrega as variáveis do arquivo .env
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
-# Configuração da localidade para o formato de moeda brasileiro
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
 # Credenciais de login
 USUARIO = os.getenv('USUARIO')
 SENHA = os.getenv('SENHA')
 
+# Definição dos meses para o dropdown
 MESES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
+# Função para formatar valores em reais manualmente
+def formatar_moeda(valor):
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+# Função para carregar a planilha de investimentos de um determinado ano
 def carregar_planilha(ano):
     try:
         workbook = openpyxl.load_workbook(f"investimentos_btc_{ano}.xlsx")
     except FileNotFoundError:
         workbook = openpyxl.Workbook()
-        workbook.remove(workbook.active)
+        workbook.remove(workbook.active)  # Remove a aba padrão
         for mes in MESES:
             sheet = workbook.create_sheet(title=mes)
             sheet.append(["Investimento (R$)", "Quantidade de BTC"])
         workbook.save(f"investimentos_btc_{ano}.xlsx")
     return workbook
 
+# Função para obter a cotação atual do BTC em reais
 def obter_cotacao_btc():
     try:
         url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl"
@@ -87,7 +90,7 @@ def resumo(ano):
         aba = workbook[sheet]
         investimento = sum(cell.value for cell in aba["A"] if isinstance(cell.value, (int, float)))
         quantidade_btc = sum(cell.value for cell in aba["B"] if isinstance(cell.value, (int, float)))
-        investimento_formatado = locale.currency(investimento, grouping=True)
+        investimento_formatado = formatar_moeda(investimento)
         resumo_mensal.append({"mes": sheet, "investimento": investimento_formatado, "quantidade_btc": quantidade_btc})
 
     return render_template("resumo.html", resumo_mensal=resumo_mensal, ano=ano)
@@ -111,15 +114,16 @@ def lucro():
     cotacao_btc = obter_cotacao_btc()
     if cotacao_btc is None:
         flash("Erro ao obter a cotação do BTC.")
-        lucro_prejuizo = None
+        lucro_prejuizo = None  # Define lucro_prejuizo como None se a cotação falhar
     else:
         valor_total_em_reais = total_btc * cotacao_btc
         lucro_prejuizo = valor_total_em_reais - total_investido
 
-        total_investido = locale.currency(total_investido, grouping=True)
-        valor_total_em_reais = locale.currency(valor_total_em_reais, grouping=True)
-        lucro_prejuizo_formatado = locale.currency(lucro_prejuizo, grouping=True)
-        cotacao_btc = locale.currency(cotacao_btc, grouping=True)
+        # Formata valores para exibição
+        total_investido = formatar_moeda(total_investido)
+        valor_total_em_reais = formatar_moeda(valor_total_em_reais)
+        lucro_prejuizo_formatado = formatar_moeda(lucro_prejuizo)
+        cotacao_btc = formatar_moeda(cotacao_btc)
 
     return render_template(
         "lucro.html",
@@ -176,5 +180,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
-        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
