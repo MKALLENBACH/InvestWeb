@@ -28,6 +28,25 @@ body {
     text-align: center;
 }
 
+/* Estilo específico para o formulário de login */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-box {
+    background-color: #272727;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
 /* Títulos com cor laranja para destacar o tema Bitcoin */
 h1, h2 {
     color: #f7931a;
@@ -116,9 +135,16 @@ p {
 
 /* Media Query para telas menores (celulares) */
 @media (max-width: 600px) {
-    /* Reduz o padding do container e centraliza o conteúdo */
+    /* Ajuste do container principal */
     .container {
         padding: 15px;
+        max-width: 95%;
+    }
+
+    /* Ajuste do formulário de login */
+    .login-box {
+        max-width: 90%;
+        padding: 20px;
     }
 
     /* Tamanhos de fontes menores para títulos */
