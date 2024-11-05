@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Lucro/Perda</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2><img src="https://img.icons8.com/ios-filled/50/f7931a/bitcoin.png" alt="Bitcoin" class="bitcoin-icon"> Resumo de Lucro/Perda</h2>
+        
+        <p><strong>Total Investido:</strong> {{ total_investido }}</p>
+        <p><strong>Total BTC na Carteira:</strong> {{ total_btc }}</p>
+        <p><strong>Valor Total em R$ (Cotação: {{ cotacao_btc }}):</strong> {{ valor_total_em_reais }}</p>
+        
+        <p><strong>Lucro/Perda:</strong> 
+            {% if lucro_prejuizo >= 0 %}
+                <span class="positive">{{ lucro_prejuizo_formatado }}</span>
+            {% else %}
+                <span class="negative">{{ lucro_prejuizo_formatado }}</span>
+            {% endif %}
+        </p>
+        <a href="{{ url_for('index') }}" class="button">Voltar</a>
+        <a href="{{ url_for('logout') }}" class="button logout-button">Sair</a>
+    </div>
+</body>
+</html>

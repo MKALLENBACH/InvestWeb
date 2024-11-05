@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Carregando...</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+        }
+        .loading-icon {
+            font-size: 60px;
+            color: #f7931a;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+    </style>
+    <script>
+        setTimeout(function() {
+            window.location.href = "{{ url_for('index') }}";
+        }, 2000);
+    </script>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="loading-icon">
+            <img src="https://img.icons8.com/ios-filled/100/f7931a/bitcoin.png" alt="Bitcoin" width="80" height="80">
+        </div>
+    </div>
+</body>
+</html>

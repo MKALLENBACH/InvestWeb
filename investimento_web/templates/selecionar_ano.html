@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Selecionar Ano</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h2 {
+            color: #f7931a;
+            margin-bottom: 20px;
+        }
+        label {
+            color: #f1f1f1;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+            background-color: #333;
+            color: #f1f1f1;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        .button {
+            background-color: #f7931a;
+            color: #1a1a1a;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #333;
+            color: #f7931a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Selecione o Ano para Visualizar o Resumo</h2>
+        <form action="{{ url_for('selecionar_ano') }}" method="POST">
+            <label for="ano">Ano:</label>
+            <select id="ano" name="ano" required>
+                {% for ano in anos %}
+                <option value="{{ ano }}">{{ ano }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button">Ver Resumo</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar {{ mes_selecionado }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        h2 {
+            color: #f7931a;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .linha {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        label {
+            color: #f1f1f1;
+            font-weight: bold;
+            min-width: 120px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: #333;
+            color: #f1f1f1;
+        }
+        .button, .adicionar {
+            background-color: #f7931a;
+            color: #1a1a1a;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 150px;
+            min-height: 40px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+        .button:hover, .adicionar:hover {
+            background-color: #333;
+            color: #f7931a;
+        }
+        .center {
+            text-align: center;
+        }
+        .excluir {
+            color: red;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        .excluir:hover {
+            color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Dados - {{ mes_selecionado }}</h2>
+        <form action="{{ url_for('salvar_edicao') }}" method="POST">
+            <input type="hidden" name="mes" value="{{ mes_selecionado }}">
+            <input type="hidden" name="ano" value="{{ ano }}">
+
+            <div id="valores">
+                {% for valor in valores_atuais %}
+                <div class="linha">
+                    <label>Investimento (R$):</label>
+                    <input type="text" name="investimento[]" value="{{ valor.investimento }}" required>
+                    <label>Quantidade de BTC:</label>
+                    <input type="text" name="quantidade_btc[]" value="{{ valor.quantidade_btc }}" required>
+                    <span class="excluir" onclick="excluirLinha(this)">Excluir</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="center">
+                <button type="button" class="adicionar" onclick="adicionarLinha()">Adicionar Novo Valor</button>
+            </div>
+            <br>
+            <div class="center">
+                <button type="submit" class="button">Salvar Alterações</button>
+                <a href="{{ url_for('resumo', ano=ano) }}" class="button">Voltar</a>
+            </div>            
+        </form>
+    </div>
+    
+    <script>
+        function adicionarLinha() {
+            const container = document.getElementById('valores');
+            const novaLinha = document.createElement('div');
+            novaLinha.classList.add('linha');
+            novaLinha.innerHTML = `
+                <label>Investimento (R$):</label>
+                <input type="text" name="investimento[]" required>
+                <label>Quantidade de BTC:</label>
+                <input type="text" name="quantidade_btc[]" required>
+                <span class="excluir" onclick="excluirLinha(this)">Excluir</span>
+            `;
+            container.appendChild(novaLinha);
+        }
+
+        function excluirLinha(element) {
+            const linha = element.closest('.linha');
+            linha.remove();
+        }
+    </script>    
+</body>
+</html>

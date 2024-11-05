@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investimento em Bitcoin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Bem-vindo ao Gerenciador de Investimentos em Bitcoin</h1>
+        <a href="{{ url_for('selecionar_ano') }}" class="button">Resumo Mensal</a><br>
+        <a href="{{ url_for('lucro') }}" class="button">Ver Lucro/Perda</a><br>
+        <a href="{{ url_for('logout') }}" class="button">Sair</a>
+    </div>
+</body>
+</html>

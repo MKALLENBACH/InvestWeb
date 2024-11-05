@@ -1,0 +1,115 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Fundo da página */
+body {
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Container principal */
+.container {
+    background-color: #272727;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Títulos com cor laranja para destacar o tema Bitcoin */
+h1, h2 {
+    color: #f7931a;
+    margin-bottom: 16px;
+}
+
+/* Estilo da tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+    color: #f1f1f1;
+}
+
+th {
+    background-color: #333;
+    color: #f7931a;
+    font-weight: bold;
+}
+
+/* Botões e links */
+a, .button {
+    display: inline-block;
+    padding: 10px 15px;
+    margin-top: 15px;
+    background-color: #f7931a;
+    color: #1a1a1a;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: bold;
+}
+
+a:hover, .button:hover {
+    background-color: #333;
+    color: #f7931a;
+}
+
+/* Classes para lucro e perda */
+.positive {
+    color: #00c851; /* Verde para valores positivos */
+}
+
+.negative {
+    color: #ff4444; /* Vermelho para valores negativos */
+}
+
+/* Parágrafos */
+p {
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+/* Estilo adicional para ícones */
+.bitcoin-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+/* Botão de logout */
+.logout-button {
+    background-color: #ff4444;
+    color: #ffffff;
+}
+
+.logout-button:hover {
+    background-color: #cc0000;
+}
+
+/* Linha de formulário para edição */
+.linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
